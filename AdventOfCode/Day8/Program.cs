@@ -24,11 +24,56 @@
             int width = forest[0].Count;
             int height = forest.Count;
             int visibleTrees = 0;
+            int maxScenicScore = 0;
             for(int i = 0; i < height; i++)
             {
                 for(int j = 0; j < width; j++)
                 {
-                    if(i == 0 || i == width - 1 || j == 0 || j == height - 1)
+                    int viewUp = 0, viewDown = 0, viewLeft = 0, viewRight = 0;
+                    for (int x = i - 1; x >= 0; x--)
+                    {
+                        if (x == 0 || forest[x][j].Height >= forest[i][j].Height)
+                        {
+                            viewUp = i - x;
+                            break;
+                        }
+                    }
+
+                    for (int x = i + 1; x < width; x++)
+                    {
+                        if (x == width - 1 || forest[x][j].Height >= forest[i][j].Height)
+                        {
+                            viewDown = x - i;
+                            break;
+                        }
+                    }
+
+                    for (int y = j - 1; y >= 0; y--)
+                    {
+                        if (y == 0 || forest[i][y].Height >= forest[i][j].Height)
+                        {
+                            viewLeft = j - y;
+                            break;
+                        }
+                    }
+
+                    for (int y = j + 1; y < height; y++)
+                    {
+                        if (y == height - 1 || forest[i][y].Height >= forest[i][j].Height)
+                        {
+                            viewRight = y - j;
+                            break;
+                        }
+                    }
+
+                    int scenicScore = viewUp * viewRight * viewDown * viewLeft;
+                    if (scenicScore > maxScenicScore)
+                    {
+                        maxScenicScore = scenicScore;
+                    }
+                    forest[i][j].ScenicScore = scenicScore;
+
+                    if (i == 0 || i == width - 1 || j == 0 || j == height - 1)
                     {
                         forest[i][j].Visible = true;
                         visibleTrees++;
@@ -131,12 +176,15 @@
             }
 
             Console.WriteLine("Visible trees: " + visibleTrees);
+            Console.WriteLine("Max Scenic Score: " + maxScenicScore);
         }
 
         internal class Tree
         {
             internal int Height;
             internal bool Visible = false;
+
+            public int ScenicScore { get; internal set; }
         }
     }
 }
