@@ -14,6 +14,13 @@ namespace Day9
             Point headPos = new Point(0, 0);
             Point tailPos = new Point(0, 0);
             List<Point> visitedTailSpots = new List<Point>();
+
+            Point[] rope = new Point[10];
+            for (int i = 0; i < 10; i++)
+            {
+                rope[i] = new Point(0, 0);
+            }
+
             foreach (string line in File.ReadLines("input.txt"))
             {
                 Match match = moveRegex.Match(line);
@@ -26,70 +33,58 @@ namespace Day9
                     {
                         case "U":
                             headPos.Y++;
+                            rope[0].Y++;
                             break;
                         case "D":
                             headPos.Y--;
+                            rope[0].Y--;
                             break;
                         case "L":
                             headPos.X--;
+                            rope[0].X--;
                             break;
                         case "R":
                             headPos.X++;
+                            rope[0].X++;
                             break;
                     }
 
-                    if (Math.Abs(headPos.Y - tailPos.Y) > 1)
+                    for(int knotIndex = 0; knotIndex < 9; knotIndex++)
                     {
-                        tailPos.Y += Math.Sign(headPos.Y - tailPos.Y);
-                        
-                        if (Math.Abs(headPos.X - tailPos.X) > 0)
-                        {
-                            tailPos.X += Math.Sign(headPos.X - tailPos.X);
-                        }
+                        UpdateKnotPosition(ref rope[knotIndex], ref rope[knotIndex + 1]);
                     }
 
-                    if (Math.Abs(headPos.X - tailPos.X) > 1)
+                    if (visitedTailSpots.Contains(rope[9]) == false)
                     {
-                        tailPos.X += Math.Sign(headPos.X - tailPos.X);
-
-                        if (Math.Abs(headPos.Y - tailPos.Y) > 0)
-                        {
-                            tailPos.Y += Math.Sign(headPos.Y - tailPos.Y);
-                        }
+                        visitedTailSpots.Add(rope[9]);
                     }
-
-                    if(visitedTailSpots.Contains(tailPos) == false)
-                    {
-                        visitedTailSpots.Add(tailPos);
-                    }
-                    else
-                    {
-                        string noop = "";
-                    }
-                    
-                    //if (headPos.X == tailPos.X)
-                    //{
-                    //    if(Math.Abs(headPos.Y - tailPos.Y) > 1)
-                    //    {
-                    //        tailPos.Y += Math.Sign(headPos.Y - tailPos.Y);
-                    //    }
-                    //}
-                    //else if (headPos.Y == tailPos.Y)
-                    //{
-                    //    if (Math.Abs(headPos.X - tailPos.X) > 1)
-                    //    {
-                    //        tailPos.X += Math.Sign(headPos.X - tailPos.X);
-                    //    }
-                    //}
                 }
             }
 
             Console.WriteLine("Visited Tail Spots: " + visitedTailSpots.Count);
         }
 
-        static void UpdateTailPosition()
+        static void UpdateKnotPosition(ref Point knotA, ref Point knotB)
         {
+            if (Math.Abs(knotA.Y - knotB.Y) > 1)
+            {
+                knotB.Y += Math.Sign(knotA.Y - knotB.Y);
 
+                if (Math.Abs(knotA.X - knotB.X) > 0)
+                {
+                    knotB.X += Math.Sign(knotA.X - knotB.X);
+                }
+            }
+
+            if (Math.Abs(knotA.X - knotB.X) > 1)
+            {
+                knotB.X += Math.Sign(knotA.X - knotB.X);
+
+                if (Math.Abs(knotA.Y - knotB.Y) > 0)
+                {
+                    knotB.Y += Math.Sign(knotA.Y - knotB.Y);
+                }
+            }
         }
     }
 }
