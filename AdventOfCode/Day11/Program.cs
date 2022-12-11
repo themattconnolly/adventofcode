@@ -4,6 +4,7 @@ namespace Day11
 {
     internal class Program
     {
+        internal static int CommonMonkeyFactor = 1;
         static void Main(string[] args)
         {
             Console.WriteLine("Day 11!");
@@ -65,15 +66,24 @@ namespace Day11
                 }
             }
 
-            for(int round = 1; round <= 20; round++)
+            //int commonMonkeyFactor = 1;
+            foreach(Monkey monkey in monkeys)
+            {
+                CommonMonkeyFactor *= monkey.TestDivisor;
+            }
+            Console.WriteLine("Common Monkey Factor: " + CommonMonkeyFactor);
+
+            for(int round = 1; round <= 10000; round++)
             {
                 foreach(Monkey monkey in monkeys)
                 {
                     // every item is thrown
-                    foreach(int item in monkey.Items)
+                    foreach(long item in monkey.Items)
                     {
+                        monkey.Inspections++;
                         int newItem = monkey.ProcessWorry(item);
-                        newItem = (int)Math.Floor((double) newItem / 3);
+                        //newItem = (int)Math.Floor((double) newItem / 3);
+                        //newItem = newItem % commonMonkeyFactor;
                         if(newItem % monkey.TestDivisor == 0)
                         {
                             monkeys[monkey.TrueMonkey].Items.Add(newItem);
@@ -82,27 +92,29 @@ namespace Day11
                         {
                             monkeys[monkey.FalseMonkey].Items.Add(newItem);
                         }
-
-                        monkey.Inspections++;
                     }
                     monkey.Items.Clear();
                 }
 
-                Console.WriteLine("After round " + round + ":");
-                foreach (Monkey monkey in monkeys)
+                if (round == 1 || round == 20 || round % 1000 == 0)
                 {
-                    Console.WriteLine("Monkey " + monkey.MonkeyNumber + ": " + string.Join(", ", monkey.Items));
+                    Console.WriteLine("After round " + round + ":");
+                    foreach (Monkey monkey in monkeys)
+                    {
+                        //Console.WriteLine("Monkey " + monkey.MonkeyNumber + ": " + string.Join(", ", monkey.Items));
+                        Console.WriteLine("Monkey " + monkey.MonkeyNumber + " inspected " + monkey.Inspections + " times");
+                    }
                 }
             }
 
             List<Monkey> top2Monkeys = monkeys.OrderByDescending(x => x.Inspections).Take(2).ToList();
-            Console.WriteLine("Monkey Business: " + top2Monkeys[0].Inspections * top2Monkeys[1].Inspections);
+            Console.WriteLine("Monkey Business: " + ((long)top2Monkeys[0].Inspections * top2Monkeys[1].Inspections));
         }
 
         internal class Monkey
         {
             internal int MonkeyNumber;
-            internal List<int> Items = new List<int>();
+            internal List<long> Items = new List<long>();
             internal int WorryValue;
             internal bool WorryValueSelf = false;
             internal string WorryOperation;
@@ -110,27 +122,31 @@ namespace Day11
             internal int TrueMonkey;
             internal int FalseMonkey;
             internal int Inspections;
-            internal int ProcessWorry(int input)
+            internal int ProcessWorry(long input)
             {
                 switch(this.WorryOperation)
                 {
                     case "+":
                         if (WorryValueSelf)
                         {
-                            return input + input;
+                            long retVal = (input + input) % CommonMonkeyFactor;
+                            return (int)retVal;
                         }
                         else
                         {
-                            return input + this.WorryValue;
+                            long retVal = (input + this.WorryValue) % CommonMonkeyFactor;
+                            return (int)retVal;
                         }
                     case "*":
                         if (WorryValueSelf)
                         {
-                            return input * input;
+                            long retVal = (input * input) % CommonMonkeyFactor;
+                            return (int)retVal;
                         }
                         else
                         {
-                            return input * this.WorryValue;
+                            long retVal = (input * this.WorryValue) % CommonMonkeyFactor;
+                            return (int)retVal;
                         }
                     default:
                         throw new Exception("Unhandled operation: " + this.WorryOperation);
