@@ -82,43 +82,53 @@ namespace Day14
                 }
             }
 
-            int minX = allRocks.Min(r => r.X);
             int minY = 0;
-            int maxX = allRocks.Max(r => r.X);
             int maxY = allRocks.Max(r => r.Y);
+            int floorY = allRocks.Max(r => r.Y) + 2;
 
             List<Point> allSand = new List<Point>();
-            Point nextSand = NextSandMove(new Point(500, 0), allRocks, allSand);
+            Point nextSand = NextSandMove(new Point(500, 0), allRocks, allSand, floorY);
 
-            while(nextSand.Y <= maxY)
+            //while(nextSand.Y <= maxY)
+            while (nextSand.IsEmpty == false)
             {
                 // have not yet reached infinity
                 Point previousSand = Point.Empty;
-                while(nextSand.IsEmpty == false && nextSand.Y <= maxY)
+                //while(nextSand.IsEmpty == false && nextSand.Y <= maxY)
+                while (nextSand.IsEmpty == false && nextSand.Y < floorY)
                 {
                     previousSand = nextSand;
-                    nextSand = NextSandMove(nextSand, allRocks, allSand);
+                    nextSand = NextSandMove(nextSand, allRocks, allSand, floorY);
                 }
 
-                if(nextSand.Y > maxY)
-                {
-                    continue;
-                }
+                //if(nextSand.Y > maxY)
+                //{
+                //    continue;
+                //}
 
                 // sand cannot move further, drop a new grain
                 allSand.Add(previousSand);
-                nextSand = NextSandMove(new Point(500, 0), allRocks, allSand);
+                nextSand = NextSandMove(new Point(500, 0), allRocks, allSand, floorY);
             }
 
+            allSand.Add(new Point(500, 0));
 
+
+            int minX = Math.Min(allRocks.Min(r => r.X), allSand.Min(s => s.X));
+            int maxX = Math.Max(allRocks.Max(r => r.X), allSand.Max(s => s.X));
             // draw grid
-            for (int y = minY; y <= maxY; y++)
+            for (int y = minY; y <= floorY; y++)
             {
                 for (int x = minX; x <= maxX; x++)
                 {
                     if (y == 0 && x == 500)
                     {
                         Console.Write("+");
+                        continue;
+                    }
+                    else if(y == floorY)
+                    {
+                        Console.Write("#");
                         continue;
                     }
 
@@ -147,11 +157,16 @@ namespace Day14
             Console.WriteLine(allSand.Count + " grains of sand");
         }
 
-        internal static Point NextSandMove(Point currentSand, List<Point> allRocks, List<Point> allSand)
+        internal static Point NextSandMove(Point currentSand, List<Point> allRocks, List<Point> allSand, int floorY)
         {
             Point nextMove = Point.Empty;
             int nextMoveX = currentSand.X;
             int nextMoveY = currentSand.Y + 1;
+
+            if(nextMoveY == floorY)
+            {
+                return Point.Empty;
+            }
 
             if(allRocks.FirstOrDefault(r => r.X == nextMoveX && r.Y == nextMoveY).IsEmpty &&
                 allSand.FirstOrDefault(s => s.X == nextMoveX && s.Y == nextMoveY).IsEmpty)
