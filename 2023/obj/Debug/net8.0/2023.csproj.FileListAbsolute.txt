@@ -1,0 +1,15 @@
+C:\projects\adventofcode\2023\bin\Debug\net8.0\2023.exe
+C:\projects\adventofcode\2023\bin\Debug\net8.0\2023.deps.json
+C:\projects\adventofcode\2023\bin\Debug\net8.0\2023.runtimeconfig.json
+C:\projects\adventofcode\2023\bin\Debug\net8.0\2023.dll
+C:\projects\adventofcode\2023\bin\Debug\net8.0\2023.pdb
+C:\projects\adventofcode\2023\obj\Debug\net8.0\2023.GeneratedMSBuildEditorConfig.editorconfig
+C:\projects\adventofcode\2023\obj\Debug\net8.0\2023.AssemblyInfoInputs.cache
+C:\projects\adventofcode\2023\obj\Debug\net8.0\2023.AssemblyInfo.cs
+C:\projects\adventofcode\2023\obj\Debug\net8.0\2023.csproj.CoreCompileInputs.cache
+C:\projects\adventofcode\2023\obj\Debug\net8.0\2023.sourcelink.json
+C:\projects\adventofcode\2023\obj\Debug\net8.0\2023.dll
+C:\projects\adventofcode\2023\obj\Debug\net8.0\refint\2023.dll
+C:\projects\adventofcode\2023\obj\Debug\net8.0\2023.pdb
+C:\projects\adventofcode\2023\obj\Debug\net8.0\2023.genruntimeconfig.cache
+C:\projects\adventofcode\2023\obj\Debug\net8.0\ref\2023.dll
