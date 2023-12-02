@@ -9,6 +9,7 @@ public class Day2
         System.IO.StreamReader file = new System.IO.StreamReader(filename);
         
         int part1sum = 0;
+        long part2sum = 0;
         string[] cubeColors = {"red", "green", "blue"};
         int[] maxCubeCounts = {12, 13, 14};
 
@@ -21,7 +22,7 @@ public class Day2
             string[] cubeGroups = line.Substring(line.IndexOf(":") + 2).Split(";");
 
             // iterate through the cube groups
-            int[] cubeCounts = {0, 0, 0};
+            int[] maxCubesInGame = {0, 0, 0};
             bool gamePossible = true;
             for(int cubeGroupIndex = 0; cubeGroupIndex < cubeGroups.Length; cubeGroupIndex++)
             {
@@ -42,34 +43,42 @@ public class Day2
                     int maxCubeCount = maxCubeCounts[colorIndex];
                     if(count > maxCubeCount)
                     {
-                        Console.WriteLine("Game " + gameNumber + " has " + count + " " + color + " color cubes in group " + cubeGroupIndex + ", max of " + maxCubeCount + "!");
+                        //Console.WriteLine("Game " + gameNumber + " has " + count + " " + color + " color cubes in group " + cubeGroupIndex + ", max of " + maxCubeCount + "!");
                         gamePossible = false;
-                        break;
+                        //break;
+                    }
+
+                    if(maxCubesInGame[colorIndex] < count)
+                    {
+                        maxCubesInGame[colorIndex] = count;
                     }
                 }
 
                 if(gamePossible == false)
                 {
-                    break;
+                    //break;
                 }
             }
 
             // game is possible, add the game number
             if(gamePossible == true)
             {
-                Console.WriteLine("Game " + gameNumber + " is possible!");
+                //Console.WriteLine("Game " + gameNumber + " is possible!");
                 part1sum += gameNumber;
             }
 
+            long product = maxCubesInGame[0] * maxCubesInGame[1] * maxCubesInGame[2];
+            part2sum += product;
         }
         file.Close();
 
         // print the sum
         Console.WriteLine("Part 1 Sum: " + part1sum);
         // 2687 is too low
-        // 2879
+        // 2879 is right
 
         // print the sum
-        //Console.WriteLine("Part 2 Sum: " + part2sum);
+        Console.WriteLine("Part 2 Sum: " + part2sum);
+        // 65122 is right
     }
 }
