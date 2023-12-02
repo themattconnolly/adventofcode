@@ -2,7 +2,7 @@ namespace _2023;
 public class Day1
 {   
     // function that reads in a file line by line and writes the output to the console
-    public static void RunDay1()
+    public static void Run()
     {
         string filename = "day1/input.txt";
         string line;
