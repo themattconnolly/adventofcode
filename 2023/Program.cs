@@ -14,12 +14,15 @@ if (args.Length > 0)
         string className = "_2023.Day" + dayNumber;
         // get the type
         Type type = Type.GetType(className);
-        // get the method
-        MethodInfo method = type.GetMethod("Run");
-        // create an instance of the class
-        object instance = Activator.CreateInstance(type);
-        // invoke the method
-        method.Invoke(instance, null);
+        if(args[1].StartsWith("part")){
+            string partNumber = args[1].Substring(4);
+            // get the method
+            MethodInfo method = type.GetMethod("RunPart" + partNumber);
+            // create an instance of the class
+            object instance = Activator.CreateInstance(type);
+            // invoke the method
+            method.Invoke(instance, null);
+        }
     }
 
 } else
