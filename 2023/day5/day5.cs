@@ -22,6 +22,11 @@ public class Day5
         public List<Range> ranges = new List<Range>();
     }
 
+    public class Seed
+    {
+        public long seedStart;
+        public long seedEnd;}
+
     public static void RunPart1()
     {
         string line;
@@ -34,13 +39,32 @@ public class Day5
         line = file.ReadLine();
 
         List<long> seeds = new List<long>();
-        MatchCollection seedMatches = Regex.Matches(line, @"\d+");
+        List<Seed> seedSets = new List<Seed>();
+        
+        MatchCollection seedMatches = Regex.Matches(line, @"(\d+) (\d+)");
         foreach(Match seedMatch in seedMatches)
         {
-            long seed = long.Parse(seedMatch.Value);
-            seeds.Add(seed);
-            Console.WriteLine("Found seed: " + seed);
+            long seed = long.Parse(seedMatch.Groups[1].Value);
+            long range = long.Parse(seedMatch.Groups[2].Value);
+
+            Seed newSeed = new Seed();
+            newSeed.seedStart = seed;
+            newSeed.seedEnd = seed + range;
+            seedSets.Add(newSeed);
+
+            for(long i = seed; i < seed + range; i++)
+            {
+                seeds.Add(i);
+            }
         }
+
+        Console.WriteLine("Found seeds: " + seeds.Count);
+        // Console.WriteLine("Are you sure you want to continue? (y/n)");
+        // string input = Console.ReadLine();
+        // if(input != "y")
+        // {
+        //     return;
+        // }
 
         // parse multiple lines separated by blank lines, where the first line is the name of the farm map, and the rest of the lines are the ranges
         while((line = file.ReadLine()) != null)
@@ -89,7 +113,23 @@ public class Day5
             mappedInts = MapIntsToInts(mappedInts, farmMap);
         }
 
-        // find the low mappedInt
+        List<Seed> mappedSeeds = new List<Seed>();
+        mappedSeeds = seedSets;
+        foreach(FarmMap farmMap in farmMaps)
+        {
+            //mappedSeeds = MapSeeds(mappedSeeds, farmMap);
+        }
+
+        long lowMappedSeed = long.MaxValue;
+        foreach(Seed mappedSeed in mappedSeeds)
+        {
+            if(mappedSeed.seedStart < lowMappedSeed)
+            {
+              //  lowMappedSeed = mappedSeed.seedStart;
+            }
+        }
+
+        // // find the low mappedInt
         long lowMappedInt = long.MaxValue;
         foreach(long mappedInt in mappedInts)
         {
@@ -103,11 +143,14 @@ public class Day5
         Console.WriteLine("Low location: " + lowMappedInt);
         // 993500720
 
+        //Console.WriteLine("Low location: " + lowMappedSeed);
+        // 0 is not right
     }
 
     // map ints to ints for farmranges
     public static List<long> MapIntsToInts(List<long> ints, FarmMap farmMap)
     {
+        Console.WriteLine("Mapping ints to ints for farm map: " + farmMap.name + DateTime.Now.TimeOfDay.ToString());
         List<long> mappedInts = new List<long>();
         foreach(long sourceItem in ints)
         {
@@ -121,7 +164,7 @@ public class Day5
                     // map the source item to the destination item
                     long destinationItem = sourceItem - range.sourceStart + range.destinationStart;
                     mappedInts.Add(destinationItem);
-                    Console.WriteLine("Mapped source : " + sourceItem + " to " + farmMap.name + " : " + destinationItem);
+                    //Console.WriteLine("Mapped source : " + sourceItem + " to " + farmMap.name + " : " + destinationItem);
                     foundMatch = true;
                     break;
                 }
@@ -130,11 +173,107 @@ public class Day5
             if(foundMatch == false)
             {
                 mappedInts.Add(sourceItem);
-                Console.WriteLine("No match found for source : " + sourceItem + " in " + farmMap.name);
+                //Console.WriteLine("No match found for source : " + sourceItem + " in " + farmMap.name);
             }
         }
 
         return mappedInts;
+    }
+
+    public static List<Seed> MapSeeds(List<Seed> sourceSeeds, FarmMap farmMap)
+    {
+        List<Seed> mappedSeeds = new List<Seed>();
+        foreach(Seed sourceSeed in sourceSeeds)
+        {
+            bool foundMatch = false;
+            // iterate through the ranges
+            foreach(Range range in farmMap.ranges)
+            {
+                // check if the source seed is in the range, either starting in the middle, 
+                // or starting before and ending in the middle, or starting before and ending after
+                if(sourceSeed.seedStart >= range.sourceStart && sourceSeed.seedStart < (range.sourceStart + range.length) ||
+                sourceSeed.seedEnd >= range.sourceStart && sourceSeed.seedEnd < (range.sourceStart + range.length) ||
+                sourceSeed.seedStart < range.sourceStart && sourceSeed.seedEnd > (range.sourceStart + range.length))
+                {
+                    // map the source seed to the destination seed and split it if necessary
+                    if(sourceSeed.seedStart < range.sourceStart)
+                    {
+                        // starting before the range, split the seed into the before and the middle (and after if necessary)
+                        // split the seed
+                        Seed destinationSeed = new Seed();
+                        destinationSeed.seedStart = sourceSeed.seedStart;
+                        destinationSeed.seedEnd = range.sourceStart;
+                        mappedSeeds.Add(destinationSeed);
+                        Console.WriteLine("Split under : " + sourceSeed.seedStart + " to " + farmMap.name + " : " + destinationSeed.seedStart);
+
+                        if(sourceSeed.seedEnd > (range.sourceStart + range.length))
+                        {
+                            // starts before, ends after the range, split the seed into the middle and the after
+                            destinationSeed = new Seed();
+                            destinationSeed.seedStart = range.destinationStart;
+                            destinationSeed.seedEnd = range.destinationStart + range.length;
+                            mappedSeeds.Add(destinationSeed);
+                            Console.WriteLine("Split middle : " + sourceSeed.seedEnd + " to " + farmMap.name + " : " + destinationSeed.seedStart);
+
+                            // split the rest of the seed
+                            destinationSeed = new Seed();
+                            destinationSeed.seedStart = range.sourceStart + range.length;
+                            destinationSeed.seedEnd = sourceSeed.seedEnd;
+                            mappedSeeds.Add(destinationSeed);
+                            Console.WriteLine("Split over : " + sourceSeed.seedEnd + " to " + farmMap.name + " : " + destinationSeed.seedStart);
+                        }
+                        else
+                        {
+                            // starts before, ends during, map the second half of the seed
+                            // e.g., source of 0 to 10, range source of 5 to 15, range destination of 25 to 35
+                            destinationSeed = new Seed();
+                            destinationSeed.seedStart = range.destinationStart;
+                            destinationSeed.seedEnd = sourceSeed.seedEnd - range.sourceStart + range.destinationStart;
+                            mappedSeeds.Add(destinationSeed);
+                            Console.WriteLine("Split remainder : " + sourceSeed.seedEnd + " to " + farmMap.name + " : " + destinationSeed.seedStart);
+                        }
+                    }
+                    else if(sourceSeed.seedEnd > (range.sourceStart + range.length))
+                    {
+                        // starts after the range begins, ends after it ends
+                        // e.g., source of 7 to 17, range source of 5 to 15, range destination of 25 to 35
+                        // map the first half of the seed
+                        Seed destinationSeed = new Seed();
+                        destinationSeed.seedStart = sourceSeed.seedStart - range.sourceStart + range.destinationStart;
+                        destinationSeed.seedEnd = range.destinationStart + range.length;
+                        mappedSeeds.Add(destinationSeed);
+                        Console.WriteLine("Split first part : " + sourceSeed.seedEnd + " to " + farmMap.name + " : " + destinationSeed.seedStart);
+
+                        // split the seed
+                        destinationSeed = new Seed();
+                        destinationSeed.seedStart = range.sourceStart + range.length;
+                        destinationSeed.seedEnd = sourceSeed.seedEnd;
+                        mappedSeeds.Add(destinationSeed);
+                        Console.WriteLine("Split remainder : " + sourceSeed.seedStart + " to " + farmMap.name + " : " + destinationSeed.seedStart);
+                    }
+                    else
+                    {
+                        // must be fully within the range
+                        // e.g., source of 7 to 12, range source of 5 to 15, range destination of 25 to 35
+                        Seed destinationSeed = new Seed();
+                        destinationSeed.seedStart = (sourceSeed.seedStart - range.sourceStart) + range.destinationStart;
+                        destinationSeed.seedEnd = (sourceSeed.seedEnd - range.sourceStart) + range.destinationStart;
+                        mappedSeeds.Add(destinationSeed);
+                        Console.WriteLine("Mapped source : " + sourceSeed.seedStart + " to " + farmMap.name + " : " + destinationSeed.seedStart);
+                    }
+
+                    foundMatch = true;
+                }
+            }
+
+            if(foundMatch == false)
+            {
+                mappedSeeds.Add(sourceSeed);
+                Console.WriteLine("No match found for source : " + sourceSeed.seedStart + " in " + farmMap.name);
+            }
+        }
+
+        return mappedSeeds;
     }
 
     public static void RunPart2()
