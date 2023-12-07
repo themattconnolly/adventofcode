@@ -138,6 +138,6 @@ public class Day6
 
         // print the low mappedInt
         Console.WriteLine("Part 2 : " + raceWins);
-        // 861300 is right!
+        // 28101347
     }
 }
