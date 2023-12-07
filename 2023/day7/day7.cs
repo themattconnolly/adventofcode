@@ -1,4 +1,6 @@
 using System.Collections;
+using System.Net;
+using System.Runtime.InteropServices.Marshalling;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 
@@ -18,19 +20,19 @@ public class Day7
         {
             int cardRank = 0;
             List<char> distinctCards = rawHand.Distinct().ToList();
-            if(distinctCards.Count == 5)
-            {
-                cardRank = 0;
-                Console.WriteLine("All cards are distinct");
-            }
-            else
-            {
+            
                 // more than one
                 int maxOfCard = 0;
                 bool foundThreeOfAKind = false;
                 bool foundPair = false;
+                
                 for(int i = 0; i < distinctCards.Count; i++)
                 {
+                    if(distinctCards[i] == 'J')
+                    {
+                        continue; // skip
+                    }
+
                     int count = rawHand.Count(x => x == distinctCards[i]);
                     if(count == 5)
                     {
@@ -88,10 +90,75 @@ public class Day7
                         Console.WriteLine("Pair!");
                     }
                 }
+
+                if(distinctCards.Contains('J'))
+                {
+                    int count = rawHand.Count(x => x == 'J');
+                    
+                    switch(cardRank)
+                    {
+                        case 0: // only high card
+                            if(count == 5)
+                            {
+                                cardRank = 9; // five of a kind
+                            } 
+                            else if(count == 4)
+                            {
+                                cardRank = 9; // five of a kind
+                            }
+                            else if(count == 3)
+                            {
+                                cardRank = 8; // four of a kind
+                            }
+                            else if(count == 2)
+                            {
+                                cardRank = 6; // three of a kind
+                            }
+                            else {
+                                cardRank = 2; // one pair
+                            }
+                            break;
+                        case 2: // pair
+                            if(count == 3)
+                            {
+                                cardRank = 9; // five of a kind
+                            }
+                            else if(count == 2)
+                            {
+                                cardRank = 8; // four of a kind
+                            }
+                            else if(count == 1)
+                            {
+                                cardRank = 6; // three of a kind
+                            }
+                            break;
+                        case 5: // two pair
+                            cardRank = 7; // full house
+                            break;
+                        case 6: // three of a kind
+                            if(count == 2)
+                            {
+                                cardRank = 9; // five of a kind
+                            }
+                            else if(count == 1)
+                            {
+                                cardRank = 8; // four of a kind
+                            }
+                            break;
+                        case 7: // full house
+                            throw new Exception("impossible");
+                        case 8: // four of a kind
+                            cardRank = 9; // five of a kind
+                            break;
+                        case 9: // five of a kind
+                            throw new Exception("impossible");
+                        default:
+                            throw new Exception("impossible! cardRank: " + cardRank);
+                    }
             }
 
             //convert characters to hex value
-            handRank = string.Concat(cardRank, rawHand.Replace('A','E').Replace('T','A').Replace('J','B').Replace('Q','C').Replace('K','D'));
+            handRank = string.Concat(cardRank, rawHand.Replace('A','E').Replace('T','A').Replace('J','1').Replace('Q','C').Replace('K','D'));
 
             //Console.WriteLine("Hex hand: " + hexHand);
 
@@ -139,6 +206,11 @@ public class Day7
         Console.WriteLine("Part 1 : " + totalWinnings);
         // 253113544 is too low
         // 253205868 is right!
+
+        // part 2:
+        // 252352670 is too low
+        // 253689008 is too low
+        // 253907829 is right!
     }
 
     public static void RunPart2()
