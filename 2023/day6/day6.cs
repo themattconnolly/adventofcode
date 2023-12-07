@@ -60,7 +60,7 @@ public class Day6
 
         for(int i = 0; i < times.Length; i++)
         {
-            int raceWins = CountWins(times[i], distances[i]);
+            long raceWins = CountWins(times[i], distances[i]);
             Console.WriteLine("Race " + (i+1) + " wins: " + raceWins);
             part1 *= raceWins;
         }
@@ -70,13 +70,13 @@ public class Day6
         // 861300 is right!
     }
 
-    private static int CountWins(int raceRecord, int raceDistance)
+    private static long CountWins(long raceRecord, long raceDistance)
     {
-        int wins = 0;
-        int holdTime = 1;
-        int speed = 1;
-        int remainingTime = raceRecord - holdTime;
-        int travelDistance = speed * remainingTime;
+        long wins = 0;
+        long holdTime = 1;
+        long speed = 1;
+        long remainingTime = raceRecord - holdTime;
+        long travelDistance = speed * remainingTime;
 
         while(holdTime < raceRecord)
         {
@@ -102,10 +102,42 @@ public class Day6
 
     public static void RunPart2()
     {
-        int part2sum = 0;
-              
-        // print the sum
-        Console.WriteLine("Part 2 Sum: " + part2sum);
-        // 
+        string line;
+        System.IO.StreamReader file = new System.IO.StreamReader(filename);
+        
+        line = file.ReadLine();
+        // parse the numbers from this line: "Time:      7  15   30"
+        MatchCollection timeMatches = Regex.Matches(line, @"\d+");
+
+        // concatenate the times into a single int
+        string timeString = "";
+        foreach(Match timeMatch in timeMatches)
+        {
+            timeString += timeMatch.Value;
+        }
+        long time = long.Parse(timeString); 
+
+        Console.WriteLine("Found time: " + time);
+
+        line = file.ReadLine();
+        MatchCollection distanceMatches = Regex.Matches(line, @"\d+");
+        
+        // concatenate the distances into a single int
+        string distanceString = "";
+        foreach(Match distanceMatch in distanceMatches)
+        {
+            distanceString += distanceMatch.Value;
+        }
+        long distance = long.Parse(distanceString);
+
+        Console.WriteLine("Found distance: " + distance);
+
+        file.Close();
+
+        long raceWins = CountWins(time, distance);
+
+        // print the low mappedInt
+        Console.WriteLine("Part 2 : " + raceWins);
+        // 861300 is right!
     }
 }
