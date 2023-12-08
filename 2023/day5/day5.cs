@@ -395,7 +395,8 @@ public class Day5
 
         file.Close();
 
-        return;
+        long maxRange = Math.Max(maxSeed, Math.Max(maxRangeDestination, maxRangeSource));
+        //BitArray pots = new BitArray()
         // iterate through the farm maps
         // List<long> mappedInts = new List<long>();
         // mappedInts = seeds;
