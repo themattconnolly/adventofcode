@@ -40,7 +40,7 @@ public class Day8
             
             nodes.Add(node.key, node);
 
-            Console.WriteLine("Node " + node.key + " has left " + node.left + " and right " + node.right);
+            //Console.WriteLine("Node " + node.key + " has left " + node.left + " and right " + node.right);
         }
     }
 
@@ -85,5 +85,67 @@ public class Day8
     public static void RunPart2()
     {
         ParseFile();
+
+        // get starting nodes that end in A
+        List<Node> startingNodes = new List<Node>();
+        foreach(Node node in nodes.Values)
+        {
+            if(node.key.EndsWith("A"))
+            {
+                startingNodes.Add(node);
+            }
+        }
+
+        // write out all the starting nodes
+        foreach(Node node in startingNodes)
+        {
+            Console.WriteLine("Starting node: " + node.key);
+        }
+
+        List<int> steps = new List<int>();
+
+        // calculate steps for each starting node
+        foreach(Node startingNode in startingNodes)
+        {
+            //Console.WriteLine("Evaluating starting node: " + startingNode.key);
+            int stepsForThisNode = 0;
+            bool foundZZZ = false;
+            Node currentNode = startingNode;
+            while(foundZZZ == false)
+            {
+                for(int i = 0; i < Instructions.Length; i++)
+                {
+                    if(Instructions[i] == 'L')
+                    {
+                        currentNode = (Node)nodes[currentNode.left];
+                    }
+                    else
+                    {
+                        currentNode = (Node)nodes[currentNode.right];
+                    }
+                    stepsForThisNode++;
+                    
+                    if(currentNode.key.EndsWith('Z'))
+                    {
+                        foundZZZ = true;
+                        break;
+                    }
+                }
+            }
+
+            steps.Add(stepsForThisNode);
+        }
+
+        long lcm = 1;
+        // console write all the step counts
+        foreach(int step in steps)
+        {
+            lcm = lcm * step;
+            Console.WriteLine("Steps: " + step);
+        }
+
+        Console.WriteLine("Part 2: " + lcm);
+        // 4621697209455145957 is too high
+        // 8811050362409 is the right answer!
     }
 }
