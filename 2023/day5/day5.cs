@@ -13,6 +13,8 @@ public class Day5
         public long sourceStart;
         public long destinationStart;
         public long length;
+        public long sourceEnd;
+        public long destinationEnd;
 
     }
 
@@ -296,6 +298,115 @@ public class Day5
         return mappedSeeds;
     }
 
+    private static int CurrentReverseMapDestinationIndex = 0;
+    public static void ReverseMappedSeeds()
+    {
+        FarmMap destinationFarmMap = FarmMaps[CurrentReverseMapDestinationIndex];
+        FarmMap sourceFamMap = FarmMaps[CurrentReverseMapDestinationIndex - 1];
+        List<Seed> mappedSeeds = new List<Seed>();
+        
+        List<Range> destinationRanges = destinationFarmMap.ranges.OrderBy(r => r.destinationStart).ToList();
+        foreach(Range destinationRange in destinationRanges) // locations
+        {
+            // find all source ranges that overlap the destination range
+            // source destination of 4 to 9, destination source of 0 to 10
+            // source destination of 4 to 9, destination source of 5 to 6
+            // source destination of 4 to 9, destination source of 3 to 5
+            // source destination of 4 to 9, destination source of 8 to 10
+            // source destination of 4 to 9, destination source of 10 to 11
+            // source destination of 4 to 9, destination source of 1 to 2
+            List<Range> sourceRanges = sourceFamMap.ranges.Where(sourceRange => 
+                sourceRange.destinationStart <= destinationRange.sourceEnd && 
+                sourceRange.destinationEnd >= destinationRange.sourceStart).ToList(); // 
+
+            if(sourceRanges.Count > 0)
+            {
+                // do stuff
+                //Console.WriteLine("Found " + sourceRanges.Count + " source ranges for destination range " + destinationRange.destinationStart + "-" + (destinationRange.destinationStart + destinationRange.length));
+
+                // if any of these source ranges map all the way back to a seed, return that seed. The first match will be the lowest location.
+                foreach(Range sourceRange in sourceRanges)
+                {
+                    Range overlapRange = new Range();
+                    overlapRange.destinationStart = Math.Max(sourceRange.destinationStart, destinationRange.sourceStart);
+                    overlapRange.destinationEnd = Math.Min(sourceRange.destinationEnd, destinationRange.sourceEnd);
+                    overlapRange.sourceStart = sourceRange.sourceStart + (overlapRange.destinationStart - sourceRange.destinationStart);
+                    overlapRange.sourceEnd = sourceRange.sourceEnd - (sourceRange.destinationEnd - overlapRange.destinationEnd);
+                    // if any of these source ranges map all the way back to a seed, return that seed. The first match will be the lowest location.
+                    long result = ReverseMappedSeedsHelper(CurrentReverseMapDestinationIndex - 2, overlapRange);
+                    if(result != -1)
+                    {
+                        long winningLocation = result + (destinationRange.destinationStart - destinationRange.sourceStart);
+                        // Winning destination range! Find the overlap
+                        Console.WriteLine("Found winning location: " + winningLocation);
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    public static long ReverseMappedSeedsHelper(int reverseMapDestinationIndex, Range destinationRange)
+    {
+
+        if(reverseMapDestinationIndex == -1)
+        {
+            // do we have a seed that maps all the way back to the beginning?
+            // 
+            List<Seed> matchingSeeds = SeedSets.Where(seedSet => 
+                seedSet.seedStart <= destinationRange.sourceEnd && 
+                seedSet.seedEnd >= destinationRange.sourceStart).OrderBy(x => x.seedStart).ToList();
+
+            if(matchingSeeds.Count > 0)
+            {
+                long result = Math.Max(matchingSeeds[0].seedStart, destinationRange.destinationStart);
+                return result;
+            }
+
+            return -1;
+        }
+        else
+        {   
+            FarmMap sourceFamMap = FarmMaps[reverseMapDestinationIndex];
+            Console.WriteLine("Looking for matches in " + sourceFamMap.name);
+        
+            List<Range> sourceRanges = sourceFamMap.ranges.Where(sourceRange => 
+                sourceRange.destinationStart <= destinationRange.sourceEnd && 
+                sourceRange.destinationEnd >= destinationRange.sourceStart).ToList();
+
+            if(sourceRanges.Count > 0)
+            {
+                // do stuff
+                Console.WriteLine("Found " + sourceRanges.Count + " source ranges for destination range " + destinationRange.destinationStart + "-" + (destinationRange.destinationStart + destinationRange.length));
+
+                foreach(Range sourceRange in sourceRanges)
+                {
+                    Range overlapRange = new Range();
+                    overlapRange.destinationStart = Math.Max(sourceRange.destinationStart, destinationRange.sourceStart);
+                    overlapRange.destinationEnd = Math.Min(sourceRange.destinationEnd, destinationRange.sourceEnd);
+                    overlapRange.sourceStart = sourceRange.sourceStart + (overlapRange.destinationStart - sourceRange.destinationStart);
+                    overlapRange.sourceEnd = sourceRange.sourceEnd - (sourceRange.destinationEnd - overlapRange.destinationEnd);
+
+                    // if any of these source ranges map all the way back to a seed, return that seed. The first match will be the lowest location.
+                    long result = ReverseMappedSeedsHelper(reverseMapDestinationIndex - 1, overlapRange);
+
+                    if(result != -1)
+                    {
+                        // result is within overlaptRange
+                        result = result + (destinationRange.destinationStart - destinationRange.sourceStart);
+                        return result;
+                    }
+                }
+            }
+        }
+
+        return -1;
+    }
+
+    private static List<FarmMap> FarmMaps = new List<FarmMap>();
+
+    private static List<Seed> SeedSets = new List<Seed>();
+
     public static void RunPart2()
     {
         string line;
@@ -303,12 +414,11 @@ public class Day5
         
         long part1sum = 0;
 
-        List<FarmMap> farmMaps = new List<FarmMap>();
+        //List<FarmMap> farmMaps = new List<FarmMap>();
         // parse the first line into the n-digit seeds: seeds: 79 14 55 13
         line = file.ReadLine();
 
         //List<long> seeds = new List<long>();
-        List<Seed> seedSets = new List<Seed>();
         
         long maxSeed = 0;
         MatchCollection seedMatches = Regex.Matches(line, @"(\d+) (\d+)");
@@ -320,7 +430,7 @@ public class Day5
             Seed newSeed = new Seed();
             newSeed.seedStart = seed;
             newSeed.seedEnd = seed + range - 1; // -1 because the end is inclusive
-            seedSets.Add(newSeed);
+            SeedSets.Add(newSeed);
 
             if(newSeed.seedEnd > maxSeed)
             {
@@ -335,7 +445,7 @@ public class Day5
             // }
         }
 
-        Console.WriteLine("Found seed sets: " + seedSets.Count + " with max seed of " + string.Format("{0:n0}", maxSeed));
+        Console.WriteLine("Found seed sets: " + SeedSets.Count + " with max seed of " + string.Format("{0:n0}", maxSeed));
         //Console.WriteLine("Found seeds: " + seeds.Count);
 
         // parse multiple lines separated by blank lines, where the first line is the name of the farm map, and the rest of the lines are the ranges
@@ -366,6 +476,8 @@ public class Day5
                     range.destinationStart = long.Parse(rangeParts[0]);
                     range.sourceStart = long.Parse(rangeParts[1]);
                     range.length = long.Parse(rangeParts[2]);
+                    range.destinationEnd = range.destinationStart + range.length - 1; // -1 because the end is inclusive
+                    range.sourceEnd = range.sourceStart + range.length - 1; // -1 because the end is inclusive
                     // add the range to the farm map
                     farmMap.ranges.Add(range);
                     //Console.WriteLine("Found range: " + range.sourceStart + " " + range.destinationStart + " " + range.length);
@@ -381,8 +493,10 @@ public class Day5
                         maxRangeSource = range.sourceStart + range.length;
                     }
                 }
+                // sort by the source start
+                //farmMap.ranges = farmMap.ranges.OrderBy(x => x.sourceStart).ToList();
                 // add the farm map to the list
-                farmMaps.Add(farmMap);
+                FarmMaps.Add(farmMap);
 
                 Console.WriteLine("Found farm map name: " + farmMap.name + " with " + farmMap.ranges.Count + " ranges");
             }
@@ -407,10 +521,10 @@ public class Day5
         // }
 
         List<Seed> mappedSeeds = new List<Seed>();
-        mappedSeeds = seedSets;
-        foreach(FarmMap farmMap in farmMaps)
+        mappedSeeds = SeedSets;
+        foreach(FarmMap farmMap in FarmMaps)
         {
-            mappedSeeds = MapSeeds(mappedSeeds, farmMap);
+            //mappedSeeds = MapSeeds(mappedSeeds, farmMap);
 
             // Console.WriteLine("Are you sure you want to continue? (y/n)");
             // string input = Console.ReadLine();
@@ -420,14 +534,24 @@ public class Day5
             // }
         }
 
-        long lowMappedSeed = long.MaxValue;
-        foreach(Seed mappedSeed in mappedSeeds)
-        {
-            if(mappedSeed.seedStart < lowMappedSeed)
-            {
-                lowMappedSeed = mappedSeed.seedStart;
-            }
-        }
+        // go backwards from the last farmmap to the first, mapping the seeds to seeds
+        //List<
+        // for(int i = farmMaps.Count - 1; i >= 0; i--)
+        // {
+
+        // }
+
+        CurrentReverseMapDestinationIndex = FarmMaps.Count - 1;
+        ReverseMappedSeeds();
+
+        // long lowMappedSeed = long.MaxValue;
+        // foreach(Seed mappedSeed in mappedSeeds)
+        // {
+        //     if(mappedSeed.seedStart < lowMappedSeed)
+        //     {
+        //         lowMappedSeed = mappedSeed.seedStart;
+        //     }
+        // }
 
         // // find the low mappedInt
         // long lowMappedInt = long.MaxValue;
@@ -439,7 +563,9 @@ public class Day5
         //     }
         // }
 
-        Console.WriteLine("Low location: " + lowMappedSeed);
+        //Console.WriteLine("Low location: " + lowMappedSeed);
         // 0 is not right
+        // 60756547 is too high
+
     }
 }
