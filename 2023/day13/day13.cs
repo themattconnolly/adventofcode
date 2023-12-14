@@ -135,13 +135,102 @@ public class Day13
 
         return result;
     }
+
+    public static int CompareCharArrays(char[] a, char[] b)
+    {
+        int result = 0;
+        for(int i = 0; i < a.Length; i++)
+        {
+            if(a[i] != b[i])
+            {
+                result++;
+            }
+        }
+        return result;
+    }
+    
+
+
+
+    private static int GetPart2PatternMatchResult(List<char[]> rowOrColumns)
+    {
+        int result = -1;
+        for(int rowIndex = 0; rowIndex < rowOrColumns.Count - 1; rowIndex++)
+        {
+            int differences = CompareCharArrays(rowOrColumns[rowIndex], rowOrColumns[rowIndex + 1]);
+
+            if(differences <= 1)
+            {
+                bool foundSmudge = false;
+                if(differences == 1) foundSmudge = true;
+                Console.WriteLine("Found a close match at rows " + rowIndex + " and " + (rowIndex + 1));
+
+                int rowsFromStart = rowIndex;
+                int rowsFromEnd = rowOrColumns.Count - rowIndex - 2;
+
+                int rowsToCheck = Math.Min(rowsFromStart, rowsFromEnd);
+                bool foundMismatch = false;
+                for(int i = 1; i <= rowsToCheck; i++)
+                {
+                    int indexToCompare1 = rowIndex - i;
+                    int indexToCompare2 = rowIndex + i + 1;
+
+                    int moreDifferences = CompareCharArrays(rowOrColumns[indexToCompare1], rowOrColumns[indexToCompare2]);
+
+                    if((foundSmudge && moreDifferences == 0) || (foundSmudge == false && moreDifferences <= 1))
+                    {
+                        if(moreDifferences == 1) foundSmudge = true;
+                        //Console.WriteLine("Found a match at rows " + (indexToCompare1) + " and " + (indexToCompare2));
+                    }
+                    else
+                    {
+                        Console.WriteLine("- Didn't match");
+                        foundMismatch = true;
+                        break;
+                    }
+                }
+
+                if(!foundMismatch && foundSmudge)
+                {
+                    Console.WriteLine("- Matched all the way to the end with a smudge");
+                    return rowIndex + 1; // this is the number of rows from the beginning
+                }
+            }
+        }
+
+        return result;
+    }
     
     public static void RunPart2()
     {
         ParseFile();
 
-        //Console.WriteLine("Part 2 : " + part2sum);
-        // 
+        long part2sum = 0;
+        foreach(Pattern pattern in Patterns)
+        {
+            Console.WriteLine("== Examining Pattern ==");
+            // look for two successive rows that are the same
+            int horizontalMatch = GetPart2PatternMatchResult(pattern.Rows);
+            if(horizontalMatch != -1)
+            {
+                part2sum += 100 * horizontalMatch;
+                Console.WriteLine("Found a horizontal match at row " + horizontalMatch);
+            } else {
+                Console.WriteLine("No horizontal match");
+            
+            int verticalMatch = GetPart2PatternMatchResult(pattern.Columns);
+            if(verticalMatch != -1)
+            {
+                part2sum += verticalMatch;
+                Console.WriteLine("Found a vertical match at column " + verticalMatch);
+            } else {
+                Console.WriteLine("No vertical match");}
+            }
+        } 
+
+        Console.WriteLine("Part 2 : " + part2sum);
+        // 38174 is too high
+        // 35915 is right!
     }
 
 }
