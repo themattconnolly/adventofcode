@@ -105,8 +105,119 @@ public class Day14
                     RoundedRocks[i] = new Coordinate() { X = rock.X, Y = rock.Y + 1 };
                 }
             }
+        }
     }
-        
+
+    // ShiftWest
+    public static void ShiftWest()
+    {
+        bool couldMove = true;
+        while(couldMove == true)
+        {
+            couldMove = false;
+            // move all rounded rocks west unless they are blocked by a cube rock, the grid boundary, or another rock
+            for(int i = 0; i < RoundedRocks.Count; i++)
+            {
+                Coordinate rock = RoundedRocks[i];
+                if(rock.X == 0)
+                {
+                    // rock is at the left of the grid, so it can't move
+                    continue;
+                }
+                else if(Grid[rock.Y][rock.X - 1] == '#')
+                {
+                    // rock is blocked by a cube rock
+                    continue;
+                }
+                else if(Grid[rock.Y][rock.X - 1] == 'O')
+                {
+                    // rock is blocked by another rounded rock
+                    continue;
+                }
+                else
+                {
+                    couldMove = true;
+                    // move the rock west
+                    Grid[rock.Y][rock.X] = '.';
+                    Grid[rock.Y][rock.X - 1] = 'O';
+                    RoundedRocks[i] = new Coordinate() { X = rock.X - 1, Y = rock.Y };
+                }
+            }
+        }
+    }
+
+    public static void ShiftSouth()
+    {
+        bool couldMove = true;
+        while(couldMove == true)
+        {
+            couldMove = false;
+            // move all rounded rocks south unless they are blocked by a cube rock, the grid boundary, or another rock
+            for(int i = 0; i < RoundedRocks.Count; i++)
+            {
+                Coordinate rock = RoundedRocks[i];
+                if(rock.Y == 0)
+                {
+                    // rock is at the bottom of the grid, so it can't move
+                    continue;
+                }
+                else if(Grid[rock.Y - 1][rock.X] == '#')
+                {
+                    // rock is blocked by a cube rock
+                    continue;
+                }
+                else if(Grid[rock.Y - 1][rock.X] == 'O')
+                {
+                    // rock is blocked by another rounded rock
+                    continue;
+                }
+                else
+                {
+                    couldMove = true;
+                    // move the rock south
+                    Grid[rock.Y][rock.X] = '.';
+                    Grid[rock.Y - 1][rock.X] = 'O';
+                    RoundedRocks[i] = new Coordinate() { X = rock.X, Y = rock.Y - 1 };
+                }
+            }
+        }
+    }
+
+    public static void ShiftEast()
+    {
+        bool couldMove = true;
+        while(couldMove == true)
+        {
+            couldMove = false;
+            // move all rounded rocks east unless they are blocked by a cube rock, the grid boundary, or another rock
+            for(int i = 0; i < RoundedRocks.Count; i++)
+            {
+                Coordinate rock = RoundedRocks[i];
+                if(rock.X == Grid[0].Length - 1)
+                {
+                    // rock is at the right of the grid, so it can't move
+                    continue;
+                }
+                else if(Grid[rock.Y][rock.X + 1] == '#')
+                {
+                    // rock is blocked by a cube rock
+                    continue;
+                }
+                else if(Grid[rock.Y][rock.X + 1] == 'O')
+                {
+                    // rock is blocked by another rounded rock
+                    continue;
+                }
+                else
+                {
+                    couldMove = true;
+                    // move the rock east
+                    Grid[rock.Y][rock.X] = '.';
+                    Grid[rock.Y][rock.X + 1] = 'O';
+                    RoundedRocks[i] = new Coordinate() { X = rock.X + 1, Y = rock.Y };
+                }
+            }
+        }
     }
     
     public static void RunPart1()
@@ -141,6 +252,7 @@ public class Day14
         // 110274 is right
     }
 
+    public static Hashtable GridStates = new Hashtable();
   
     public static void RunPart2()
     {
@@ -148,9 +260,72 @@ public class Day14
 
         long part2sum = 0;
         
+        long cycles = 1;
+        while(cycles <= 1000000000)
+        {
+            if(cycles % 1000000 == 0) {
+                Console.WriteLine("Cycle " + cycles);
+            }
+            ShiftNorth();
+            ShiftWest();
+            ShiftSouth();
+            ShiftEast();
+
+            //Console.WriteLine("After " + cycles + " cycles:");
+            for(int i = Grid.Length - 1; i >= 0; i--)
+            {
+                //Console.WriteLine("Row " + (i+1).ToString().PadLeft(2) + ": " + string.Join("", Grid[i]));
+            }
+
+            // create a hash of the grid state
+            string gridHash = "";
+            for(int i = 0; i < Grid.Length; i++)
+            {
+                gridHash += string.Join("", Grid[i]);
+            }
+
+            // check if the grid state has been seen before
+            if(GridStates.ContainsKey(gridHash))
+            {
+                // if so, we've found a cycle
+                Console.WriteLine("Found a cycle at cycle " + cycles);
+                // calculate the number of cycles remaining
+                long remainingCycles = 1000000000 - cycles;
+                // calculate the number of cycles in the cycle
+                long cycleLength = cycles - (long)GridStates[gridHash];
+
+                if(remainingCycles % cycleLength == 0)
+                {
+                    Console.WriteLine("Remaining cycles is a multiple of cycle length");
+                    break;
+                } else {
+                    Console.WriteLine("Remaining cycles is not a multiple of cycle length");
+                }
+
+            } else {
+                // if not, add the grid state to the hash table
+                GridStates.Add(gridHash, cycles);
+            }
+
+            cycles++;
+        }
+
+        // iterate over each row, multiplying the number of rounded rocks by the row number, adding that to part1sum
+        for(int i = 0; i < Grid.Length; i++)
+        {
+            int numRoundedRocks = 0;
+            for(int j = 0; j < Grid[i].Length; j++)
+            {
+                if(Grid[i][j] == 'O')
+                {
+                    numRoundedRocks++;
+                }
+            }
+            part2sum += numRoundedRocks * (i + 1);
+        }
 
         Console.WriteLine("Part 2 : " + part2sum);
-        // 
+        // 90982 is right!
     }
 
 }
