@@ -107,90 +107,106 @@ public class Day12
         // }
     }
 
-    private static int PossibleArrangementsSimple(string remainingPartText, List<int> remainingPartLengths)
-    {
-        if(remainingPartText.Length == 0 && remainingPartLengths.Count == 0)
-        {
-            return 1;
-        }
-        else if(remainingPartText.Length > 0)
-        {
-            if(remainingPartLengths.Sum() > remainingPartText.Length)
-            {
-                return 0;
-            }
+    private static Hashtable PossibleArrangementsCache = new Hashtable();
 
-            if(remainingPartLengths.Count == 0)
+    private static long PossibleArrangementsSimple(string remainingPartText, List<int> remainingPartLengths)
+    {
+        if(PossibleArrangementsCache.ContainsKey(remainingPartText + string.Join(",", remainingPartLengths)))
+        {
+            return (long)PossibleArrangementsCache[remainingPartText + string.Join(",", remainingPartLengths)];
+        }
+        else
+        {
+            long retVal = -1;
+
+            if(remainingPartText.Length == 0 && remainingPartLengths.Count == 0)
             {
-                // if remainingPartText only contains . and ? this is possible
-                if(remainingPartText.All(c => c == '.' || c == '?'))
+                retVal = 1;
+            }
+            else if(remainingPartText.Length > 0)
+            {
+                if(remainingPartLengths.Sum() > remainingPartText.Length)
                 {
-                    return 1;
+                    retVal = 0;
+                }
+                else if(remainingPartLengths.Count == 0)
+                {
+                    // if remainingPartText only contains . and ? this is possible
+                    if(remainingPartText.All(c => c == '.' || c == '?'))
+                    {
+                        retVal = 1;
+                    }
+                    else
+                    {
+                        retVal = 0;
+                    }
                 }
                 else
                 {
-                    return 0;
-                }
-            }
-
-            char nextChar = remainingPartText[0];
-            if(nextChar == '.') // skip until something interesting
-            {
-                return PossibleArrangementsSimple(remainingPartText.Substring(1), remainingPartLengths);
-            }
-            else if(nextChar == '?')
-            {
-                // if the next character is a ?, then we can either skip it or replace it with a #
-                int optionA = PossibleArrangementsSimple(remainingPartText.Substring(1), remainingPartLengths);
-                int optionB = PossibleArrangementsSimple(string.Concat('#',remainingPartText.Substring(1)), remainingPartLengths);
-
-                optionA = PossibleArrangementsSimple(remainingPartText.Substring(1), remainingPartLengths);
-                optionB = PossibleArrangementsSimple(string.Concat('#',remainingPartText.Substring(1)), remainingPartLengths);
-                return optionA + optionB;
-            }
-            else if(nextChar == '#')
-            {
-                int nextRemainingPartLength = remainingPartLengths[0];
-                if(remainingPartLengths.Count > 0 && remainingPartText.Length >= nextRemainingPartLength)
-                {
-                    if(remainingPartText.Substring(0,nextRemainingPartLength).Contains('.') == false)
+                    char nextChar = remainingPartText[0];
+                    if(nextChar == '.') // skip until something interesting
                     {
-                        if(remainingPartText.Length == nextRemainingPartLength && remainingPartLengths.Count == 1)
+                        retVal = PossibleArrangementsSimple(remainingPartText.Substring(1), remainingPartLengths);
+                    }
+                    else if(nextChar == '?')
+                    {
+                        // if the next character is a ?, then we can either skip it or replace it with a #
+                        long optionA = PossibleArrangementsSimple(remainingPartText.Substring(1), remainingPartLengths);
+                        long optionB = PossibleArrangementsSimple(string.Concat('#',remainingPartText.Substring(1)), remainingPartLengths);
+
+                        // optionA = PossibleArrangementsSimple(remainingPartText.Substring(1), remainingPartLengths);
+                        // optionB = PossibleArrangementsSimple(string.Concat('#',remainingPartText.Substring(1)), remainingPartLengths);
+                        retVal = optionA + optionB;
+                    }
+                    else if(nextChar == '#')
+                    {
+                        int nextRemainingPartLength = remainingPartLengths[0];
+                        if(remainingPartLengths.Count > 0 && remainingPartText.Length >= nextRemainingPartLength)
                         {
-                            return 1;
-                        }
-                        else
-                        {
-                            string remainingPartTextAfterPart = remainingPartText.Substring(nextRemainingPartLength);
-                            if(remainingPartTextAfterPart.Length > 0 && remainingPartTextAfterPart[0] == '#')
+                            if(remainingPartText.Substring(0,nextRemainingPartLength).Contains('.') == false)
                             {
-                                return 0;
+                                if(remainingPartText.Length == nextRemainingPartLength && remainingPartLengths.Count == 1)
+                                {
+                                    retVal = 1;
+                                }
+                                else
+                                {
+                                    string remainingPartTextAfterPart = remainingPartText.Substring(nextRemainingPartLength);
+                                    if(remainingPartTextAfterPart.Length > 0 && remainingPartTextAfterPart[0] == '#')
+                                    {
+                                        retVal = 0;
+                                    }
+                                    else
+                                    {
+                                        retVal = PossibleArrangementsSimple(remainingPartTextAfterPart.Substring(1), remainingPartLengths.Skip(1).ToList());
+                                    }
+                                }
                             }
                             else
                             {
-                                return PossibleArrangementsSimple(remainingPartTextAfterPart.Substring(1), remainingPartLengths.Skip(1).ToList());
+                                retVal = 0;
                             }
+                        }
+                        else
+                        {
+                            retVal = 0;
                         }
                     }
                     else
                     {
-                        return 0;
+                        // invalid character
+                        throw new Exception("Invalid character");
                     }
-                }
-                else
-                {
-                    return 0;
                 }
             }
             else
             {
-                // invalid character
-                throw new Exception("Invalid character");
+                retVal = 0;
             }
-        }
-        else
-        {
-            return 0;
+
+            PossibleArrangementsCache[remainingPartText + string.Join(",", remainingPartLengths)] = retVal;
+
+            return retVal;
         }
     }
 
@@ -334,7 +350,7 @@ public class Day12
         long part1sum = 0;
         foreach(PartSet partSet in PartSets)
         {
-            int possibleArrangements = PossibleArrangementsSimple(partSet.RawText, partSet.PartLengths);
+            long possibleArrangements = PossibleArrangementsSimple(partSet.RawText, partSet.PartLengths);
             Console.WriteLine("Part set: " + partSet.RawText + " with lengths: " + string.Join(",", partSet.PartLengths) + " has " + possibleArrangements + " possible arrangements");
             part1sum += possibleArrangements;
         }
@@ -345,10 +361,73 @@ public class Day12
     
     public static void RunPart2()
     {
-        ParseFile();
+        ParseFile2();
 
-        //Console.WriteLine("Part 2 : " + part2sum);
-        // 
+        long part2sum = 0;
+        foreach(PartSet partSet in PartSets)
+        {
+            long possibleArrangements = PossibleArrangementsSimple(partSet.RawText, partSet.PartLengths);
+            Console.WriteLine("Part set: " + partSet.RawText + " with lengths: " + string.Join(",", partSet.PartLengths) + " has " + possibleArrangements + " possible arrangements");
+            part2sum += possibleArrangements;
+        }
+        Console.WriteLine("Part 2 : " + part2sum);
+        // 11496355930 is too low
+        // 15978062956 is too low
+        // 1738259948652 is right!
     }
 
+    private static void ParseFile2()
+    {
+        System.IO.StreamReader file = new System.IO.StreamReader(filename);
+        
+        string line;
+        while((line = file.ReadLine()) != null)
+        {
+            string[] sections = line.Split(" ");
+
+            PartSet partSet = new PartSet();
+            partSet.Parts = new List<IPart>();
+            // parse a string like "1,2,3" into a list of ints
+            string[] partLengthText = sections[1].Split(',');
+            List<int> partLengths = new List<int>();
+            foreach(string partLength in partLengthText)
+            {
+                partLengths.Add(int.Parse(partLength));
+            }
+            partSet.PartLengths = partLengths;
+            partSet.RawText = sections[0];
+
+            string newText = partSet.RawText;
+            List<int> newPartLengths = partSet.PartLengths.ToList();
+            for(int i = 0; i < 4; i++)
+            {
+                newText += "?" + partSet.RawText;
+                newPartLengths.AddRange(partSet.PartLengths);
+            }
+            partSet.RawText = newText;
+            partSet.PartLengths = newPartLengths;
+
+            PartSets.Add(partSet);
+        }
+
+        file.Close();
+
+        // foreach(PartSet partSet in PartSets)
+        // {
+        //     Console.WriteLine("Part set: " + partSet.RawText + " with lengths: " + string.Join(",", partSet.PartLengths));
+        //     foreach(IPart part in partSet.Parts)
+        //     {
+        //         if(part is Part)
+        //         {
+        //             Console.WriteLine("- Part: " + part.Position + ", " + part.Length);
+        //         } else if(part is UnknownPartSet)
+        //         {
+        //             Console.WriteLine("- Unknown part: " + part.Position + ", " + part.Length + " with text: " + ((UnknownPartSet)part).RawText);
+        //         }
+        //     }
+
+        //     int possibleArrangements = PossibleArrangements(partSet);
+        //     Console.WriteLine("- Possible arrangements: " + possibleArrangements);
+        // }
+    }
 }
