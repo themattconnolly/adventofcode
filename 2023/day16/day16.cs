@@ -294,14 +294,68 @@ public class Day16
         // 7034 is right
     }
 
+    public static int GetLightCount()
+    {
+        int lightCount = 0;
+        for(int i = LightGrid.Length - 1; i >= 0; i--)
+        {
+            if(LightGrid[i] == null)
+            {
+                continue;
+            }
+            for(int j = 0; j < LightGrid[i].Length; j++)
+            {
+                if(LightGrid[i][j] != null)
+                {
+                    lightCount++;
+                }
+            }
+        }
+        return lightCount;
+    }
     
     public static void RunPart2()
     {
         ParseFile();
 
+        int maxSquares = 0;
+
+        for(int i = 0; i < Grid.Length; i++)
+        {
+            LightGrid = new LightSquare[Grid.Length][];
+            LightGo(0, i, "right");
+            if(GetLightCount() > maxSquares)
+            {
+                maxSquares = GetLightCount();
+            }
+
+            LightGrid = new LightSquare[Grid.Length][];
+            LightGo(Grid[i].Length - 1, i, "left");
+            if(GetLightCount() > maxSquares)
+            {
+                maxSquares = GetLightCount();
+            }
+        }
+
+        for(int i = 0; i < Grid[0].Length; i++)
+        {
+            LightGrid = new LightSquare[Grid.Length][];
+            LightGo(i, 0, "up");
+            if(GetLightCount() > maxSquares)
+            {
+                maxSquares = GetLightCount();
+            }
+
+            LightGrid = new LightSquare[Grid.Length][];
+            LightGo(i, Grid.Length - 1, "down");
+            if(GetLightCount() > maxSquares)
+            {
+                maxSquares = GetLightCount();
+            }
+        }
         
-        //Console.WriteLine("Part 2 : " + part2sum);
-        // 268497 is right!
+        Console.WriteLine("Part 2 : " + maxSquares);
+        // 7759 is right!
     }
 
 }
