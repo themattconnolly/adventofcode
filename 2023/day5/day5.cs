@@ -409,6 +409,11 @@ public class Day5
 
     public static void RunPart2()
     {
+        Help1.Run();
+    }
+
+    public static void RunPart2_bad()
+    {
         string line;
         System.IO.StreamReader file = new System.IO.StreamReader(filename);
         
@@ -566,6 +571,6 @@ public class Day5
         //Console.WriteLine("Low location: " + lowMappedSeed);
         // 0 is not right
         // 60756547 is too high
-
+        // 4917124 is right! Thanks Mic1010
     }
 }
