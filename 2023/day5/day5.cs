@@ -185,26 +185,34 @@ public class Day5
 
     public static List<Seed> MapSeeds(List<Seed> sourceSeeds, FarmMap farmMap)
     {
-        Console.WriteLine("===== Mapping " + sourceSeeds.Count + " seeds to : " + farmMap.name + " with " + farmMap.ranges.Count + " ranges @" + DateTime.Now.TimeOfDay.ToString());
+        Console.WriteLine("===== Mapping " + sourceSeeds.Count + " source sets to : " + farmMap.name + " with " + farmMap.ranges.Count + " ranges @" + DateTime.Now.TimeOfDay.ToString());
         List<Seed> mappedSeeds = new List<Seed>();
-        List<Seed> unmappedSeeds = sourceSeeds;
+        List<Seed> unmappedSeeds = sourceSeeds.ToList();
         // foreach(Seed sourceSeed in sourceSeeds)
         // {
             //bool foundMatch = false;
             // iterate through the ranges
         int rangeIndex = 0;
+        long minLocationRange = long.MaxValue;
+        bool locationMapping = farmMap.name == "location";
         foreach(Range range in farmMap.ranges)
         {
-            Console.WriteLine("Evaluating range " + rangeIndex++ + " of " + farmMap.ranges.Count + " @" + DateTime.Now.TimeOfDay.ToString());
+            Console.WriteLine("Evaluating range " + ++rangeIndex + " of " + farmMap.ranges.Count + " @" + DateTime.Now.TimeOfDay.ToString());
+            int sourceSeedIndex = 0;
             foreach(Seed sourceSeed in sourceSeeds)
             {
                 bool foundMatch = false;
                 // check if the source seed is in the range, either starting in the middle, 
                 // or starting before and ending in the middle, or starting before and ending after
-                long rangeEnd = range.sourceStart + range.length;
-                if(sourceSeed.seedStart >= range.sourceStart && sourceSeed.seedStart < rangeEnd || // start is within range
-                sourceSeed.seedEnd >= range.sourceStart && sourceSeed.seedEnd < rangeEnd || // end is within range
-                sourceSeed.seedStart < range.sourceStart && sourceSeed.seedEnd >= rangeEnd) // start is before and end is after
+                if(sourceSeedIndex % 100000 == 0)
+                {
+                    Console.WriteLine("Evaluating seed " + sourceSeedIndex + " of " + sourceSeeds.Count + " @" + DateTime.Now.TimeOfDay.ToString());
+                }
+                sourceSeedIndex++;
+
+                if(sourceSeed.seedStart >= range.sourceStart && sourceSeed.seedStart <= range.sourceEnd || // start is within range
+                sourceSeed.seedEnd >= range.sourceStart && sourceSeed.seedEnd <= range.sourceEnd || // end is within range
+                sourceSeed.seedStart < range.sourceStart && sourceSeed.seedEnd >= range.sourceEnd) // start is before and end is after
                 {
                     if(foundMatch == true)
                     {
@@ -218,24 +226,51 @@ public class Day5
                         // split the seed
                         Seed destinationSeed = new Seed();
                         destinationSeed.seedStart = sourceSeed.seedStart;
-                        destinationSeed.seedEnd = range.sourceStart;
-                        mappedSeeds.Add(destinationSeed);
+                        destinationSeed.seedEnd = range.sourceStart - 1;
+                        if(locationMapping)
+                        {
+                            if(destinationSeed.seedStart < minLocationRange) {
+                                minLocationRange = destinationSeed.seedStart;
+                                mappedSeeds.Add(destinationSeed);
+                            }
+                        } else
+                        {
+                            mappedSeeds.Add(destinationSeed);
+                        }
                         //Console.WriteLine("Split 1 - under : " + sourceSeed.seedStart + " to " + farmMap.name + " : " + destinationSeed.seedStart + "-" + destinationSeed.seedEnd);
 
-                        if(sourceSeed.seedEnd > rangeEnd)
+                        if(sourceSeed.seedEnd > range.sourceEnd)
                         {
                             // starts before, ends after the range, split the seed into the middle and the after
                             destinationSeed = new Seed();
                             destinationSeed.seedStart = range.destinationStart;
-                            destinationSeed.seedEnd = range.destinationStart + range.length;
+                            destinationSeed.seedEnd = range.destinationStart + range.destinationEnd;
+                            if(locationMapping)
+                        {
+                            if(destinationSeed.seedStart < minLocationRange) {
+                                minLocationRange = destinationSeed.seedStart;
+                                mappedSeeds.Add(destinationSeed);
+                            }
+                        } else
+                        {
                             mappedSeeds.Add(destinationSeed);
+                        }
                             //Console.WriteLine("Split 2 - middle : " + sourceSeed.seedEnd + " to " + farmMap.name + " : " + destinationSeed.seedStart + "-" + destinationSeed.seedEnd);
 
                             // split the rest of the seed
                             destinationSeed = new Seed();
-                            destinationSeed.seedStart = range.sourceStart + range.length;
+                            destinationSeed.seedStart = range.sourceEnd + 1;
                             destinationSeed.seedEnd = sourceSeed.seedEnd;
+                            if(locationMapping)
+                        {
+                            if(destinationSeed.seedStart < minLocationRange) {
+                                minLocationRange = destinationSeed.seedStart;
+                                mappedSeeds.Add(destinationSeed);
+                            }
+                        } else
+                        {
                             mappedSeeds.Add(destinationSeed);
+                        }
                             //Console.WriteLine("Split 3 - over : " + sourceSeed.seedEnd + " to " + farmMap.name + " : " + destinationSeed.seedStart + "-" + destinationSeed.seedEnd);
                         }
                         else
@@ -244,30 +279,57 @@ public class Day5
                             // e.g., source of 0 to 10, range source of 5 to 15, range destination of 25 to 35
                             destinationSeed = new Seed();
                             destinationSeed.seedStart = range.destinationStart;
-                            destinationSeed.seedEnd = sourceSeed.seedEnd - range.sourceStart + range.destinationStart;
+                            destinationSeed.seedEnd = (sourceSeed.seedEnd - range.sourceStart) + range.destinationStart;
+                            if(locationMapping)
+                        {
+                            if(destinationSeed.seedStart < minLocationRange) {
+                                minLocationRange = destinationSeed.seedStart;
+                                mappedSeeds.Add(destinationSeed);
+                            }
+                        } else
+                        {
                             mappedSeeds.Add(destinationSeed);
+                        }
                             //Console.WriteLine("Split 2 - remainder : " + sourceSeed.seedEnd + " to " + farmMap.name + " : " + destinationSeed.seedStart + "-" + destinationSeed.seedEnd);
 
                             //0 2359144752 26906322
                             //  2364061876
                         }
                     }
-                    else if(sourceSeed.seedEnd >= rangeEnd)
+                    else if(sourceSeed.seedEnd > range.sourceEnd)
                     {
                         // starts after the range begins, ends after it ends
                         // e.g., source of 7 to 17, range source of 5 to 15, range destination of 25 to 35
                         // map the first half of the seed
                         Seed destinationSeed = new Seed();
-                        destinationSeed.seedStart = sourceSeed.seedStart - range.sourceStart + range.destinationStart;
-                        destinationSeed.seedEnd = range.destinationStart + range.length;
-                        mappedSeeds.Add(destinationSeed);
+                        destinationSeed.seedStart = (sourceSeed.seedStart - range.sourceStart) + range.destinationStart;
+                        destinationSeed.seedEnd = range.destinationEnd;
+                        if(locationMapping)
+                        {
+                            if(destinationSeed.seedStart < minLocationRange) {
+                                minLocationRange = destinationSeed.seedStart;
+                                mappedSeeds.Add(destinationSeed);
+                            }
+                        } else
+                        {
+                            mappedSeeds.Add(destinationSeed);
+                        }
                         //Console.WriteLine("Split 1 - first part : " + sourceSeed.seedEnd + " to " + farmMap.name + " : " + destinationSeed.seedStart + "-" + destinationSeed.seedEnd);
 
                         // split the seed
                         destinationSeed = new Seed();
-                        destinationSeed.seedStart = range.sourceStart + range.length;
+                        destinationSeed.seedStart = range.sourceEnd + 1;
                         destinationSeed.seedEnd = sourceSeed.seedEnd;
-                        mappedSeeds.Add(destinationSeed);
+                        if(locationMapping)
+                        {
+                            if(destinationSeed.seedStart < minLocationRange) {
+                                minLocationRange = destinationSeed.seedStart;
+                                mappedSeeds.Add(destinationSeed);
+                            }
+                        } else
+                        {
+                            mappedSeeds.Add(destinationSeed);
+                        }
                         //Console.WriteLine("Split 2 - remainder : " + sourceSeed.seedStart + " to " + farmMap.name + " : " + destinationSeed.seedStart + "-" + destinationSeed.seedEnd);
                     }
                     else
@@ -277,22 +339,30 @@ public class Day5
                         Seed destinationSeed = new Seed();
                         destinationSeed.seedStart = (sourceSeed.seedStart - range.sourceStart) + range.destinationStart;
                         destinationSeed.seedEnd = (sourceSeed.seedEnd - range.sourceStart) + range.destinationStart;
-                        mappedSeeds.Add(destinationSeed);
+                        if(locationMapping)
+                        {
+                            if(destinationSeed.seedStart < minLocationRange) {
+                                minLocationRange = destinationSeed.seedStart;
+                                mappedSeeds.Add(destinationSeed);
+                            }
+                        } else
+                        {
+                            mappedSeeds.Add(destinationSeed);
+                        }
                         //Console.WriteLine("Mapped all : " + sourceSeed.seedStart + "-" + sourceSeed.seedEnd + " to " + farmMap.name + " : " + destinationSeed.seedStart + "-" + destinationSeed.seedEnd);
                     }
 
-                    foundMatch = true;
-                }
-
-                if(foundMatch == false)
-                {
-                    Seed destinationSeed = new Seed();
-                    destinationSeed.seedStart = sourceSeed.seedStart;
-                    destinationSeed.seedEnd = sourceSeed.seedEnd;
-                    mappedSeeds.Add(destinationSeed);
-                    //Console.WriteLine("No match found for source : " + sourceSeed.seedStart + "-" + sourceSeed.seedEnd + " in " + farmMap.name);
+                    unmappedSeeds.Remove(sourceSeed);
                 }
             }
+
+            Console.WriteLine("Evaluated " + sourceSeedIndex + " source sets");
+        }
+
+        foreach(Seed unmappedSeed in unmappedSeeds)
+        {
+            mappedSeeds.Add(unmappedSeed);
+            //Console.WriteLine("No match found for source : " + sourceSeed.seedStart + "-" + sourceSeed.seedEnd + " in " + farmMap.name);
         }
 
         return mappedSeeds;
@@ -485,18 +555,20 @@ public class Day5
                     range.sourceEnd = range.sourceStart + range.length - 1; // -1 because the end is inclusive
                     // add the range to the farm map
                     farmMap.ranges.Add(range);
-                    //Console.WriteLine("Found range: " + range.sourceStart + " " + range.destinationStart + " " + range.length);
+                    Console.WriteLine("Found range: " + range.sourceStart + " " + range.destinationStart + " " + range.length + 
+                        " (" + range.sourceStart + "-" + range.sourceEnd + "->" + range.destinationStart + "-" + range.destinationEnd + ")");
 
-                    if(range.destinationStart + range.length > maxRangeDestination)
-                    {
-                        Console.WriteLine("New max range destination: " + string.Format("{0:n0}", range.destinationStart) + "-" + string.Format("{0:n0}", (range.destinationStart + range.length)));
-                        maxRangeDestination = range.destinationStart + range.length;
-                    }
-                    if(range.sourceStart + range.length > maxRangeSource)
-                    {
-                        Console.WriteLine("New max range source: " + string.Format("{0:n0}", range.sourceStart) + "-" + string.Format("{0:n0}", (range.sourceStart + range.length)));
-                        maxRangeSource = range.sourceStart + range.length;
-                    }
+                    // maxRange - not sure why I was tracking this
+                    // if(range.destinationStart + range.length > maxRangeDestination)
+                    // {
+                    //     Console.WriteLine("New max range destination: " + string.Format("{0:n0}", range.destinationStart) + "-" + string.Format("{0:n0}", (range.destinationStart + range.length)));
+                    //     maxRangeDestination = range.destinationStart + range.length;
+                    // }
+                    // if(range.sourceStart + range.length > maxRangeSource)
+                    // {
+                    //     Console.WriteLine("New max range source: " + string.Format("{0:n0}", range.sourceStart) + "-" + string.Format("{0:n0}", (range.sourceStart + range.length)));
+                    //     maxRangeSource = range.sourceStart + range.length;
+                    // }
                 }
                 // sort by the source start
                 //farmMap.ranges = farmMap.ranges.OrderBy(x => x.sourceStart).ToList();
@@ -529,7 +601,12 @@ public class Day5
         mappedSeeds = SeedSets;
         foreach(FarmMap farmMap in FarmMaps)
         {
-            //mappedSeeds = MapSeeds(mappedSeeds, farmMap);
+            mappedSeeds = MapSeeds(mappedSeeds, farmMap);
+
+            // foreach(Seed mappedSeed in mappedSeeds)
+            // {
+            //     Console.WriteLine("Mapped seed: " + string.Format("{0:n0}", mappedSeed.seedStart) + " to " + string.Format("{0:n0}", mappedSeed.seedEnd));
+            // }
 
             // Console.WriteLine("Are you sure you want to continue? (y/n)");
             // string input = Console.ReadLine();
@@ -546,17 +623,18 @@ public class Day5
 
         // }
 
-        CurrentReverseMapDestinationIndex = FarmMaps.Count - 1;
-        ReverseMappedSeeds();
+        // reverse may not work here
+        //CurrentReverseMapDestinationIndex = FarmMaps.Count - 1;
+        //ReverseMappedSeeds();
 
-        // long lowMappedSeed = long.MaxValue;
-        // foreach(Seed mappedSeed in mappedSeeds)
-        // {
-        //     if(mappedSeed.seedStart < lowMappedSeed)
-        //     {
-        //         lowMappedSeed = mappedSeed.seedStart;
-        //     }
-        // }
+        long lowMappedSeed = long.MaxValue;
+        foreach(Seed mappedSeed in mappedSeeds)
+        {
+            if(mappedSeed.seedStart < lowMappedSeed)
+            {
+                lowMappedSeed = mappedSeed.seedStart;
+            }
+        }
 
         // // find the low mappedInt
         // long lowMappedInt = long.MaxValue;
@@ -568,7 +646,7 @@ public class Day5
         //     }
         // }
 
-        //Console.WriteLine("Low location: " + lowMappedSeed);
+        Console.WriteLine("Low location: " + lowMappedSeed);
         // 0 is not right
         // 60756547 is too high
         // 4917124 is right! Thanks Mic1010
