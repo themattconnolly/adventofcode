@@ -1,0 +1,68 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>_2024</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="day10\**" />
+    <Compile Remove="day11\**" />
+    <Compile Remove="day12\**" />
+    <Compile Remove="day13\**" />
+    <Compile Remove="day14\**" />
+    <Compile Remove="day15\**" />
+    <Compile Remove="day16\**" />
+    <Compile Remove="day17\**" />
+    <Compile Remove="day18\**" />
+    <Compile Remove="day19\**" />
+    <Compile Remove="day2\**" />
+    <Compile Remove="day3\**" />
+    <Compile Remove="day4\**" />
+    <Compile Remove="day5\**" />
+    <Compile Remove="day6\**" />
+    <Compile Remove="day7\**" />
+    <Compile Remove="day8\**" />
+    <Compile Remove="day9\**" />
+    <EmbeddedResource Remove="day10\**" />
+    <EmbeddedResource Remove="day11\**" />
+    <EmbeddedResource Remove="day12\**" />
+    <EmbeddedResource Remove="day13\**" />
+    <EmbeddedResource Remove="day14\**" />
+    <EmbeddedResource Remove="day15\**" />
+    <EmbeddedResource Remove="day16\**" />
+    <EmbeddedResource Remove="day17\**" />
+    <EmbeddedResource Remove="day18\**" />
+    <EmbeddedResource Remove="day19\**" />
+    <EmbeddedResource Remove="day2\**" />
+    <EmbeddedResource Remove="day3\**" />
+    <EmbeddedResource Remove="day4\**" />
+    <EmbeddedResource Remove="day5\**" />
+    <EmbeddedResource Remove="day6\**" />
+    <EmbeddedResource Remove="day7\**" />
+    <EmbeddedResource Remove="day8\**" />
+    <EmbeddedResource Remove="day9\**" />
+    <None Remove="day10\**" />
+    <None Remove="day11\**" />
+    <None Remove="day12\**" />
+    <None Remove="day13\**" />
+    <None Remove="day14\**" />
+    <None Remove="day15\**" />
+    <None Remove="day16\**" />
+    <None Remove="day17\**" />
+    <None Remove="day18\**" />
+    <None Remove="day19\**" />
+    <None Remove="day2\**" />
+    <None Remove="day3\**" />
+    <None Remove="day4\**" />
+    <None Remove="day5\**" />
+    <None Remove="day6\**" />
+    <None Remove="day7\**" />
+    <None Remove="day8\**" />
+    <None Remove="day9\**" />
+  </ItemGroup>
+
+</Project>
