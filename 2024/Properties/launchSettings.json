@@ -2,7 +2,7 @@
   "profiles": {
     "2024": {
       "commandName": "Project",
-      "commandLineArgs": "day1 part1"
+      "commandLineArgs": "day2 part2"
     }
   }
 }
