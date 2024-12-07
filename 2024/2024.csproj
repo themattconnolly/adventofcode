@@ -19,8 +19,6 @@
     <Compile Remove="day17\**" />
     <Compile Remove="day18\**" />
     <Compile Remove="day19\**" />
-    <Compile Remove="day6\**" />
-    <Compile Remove="day7\**" />
     <Compile Remove="day8\**" />
     <Compile Remove="day9\**" />
     <EmbeddedResource Remove="day10\**" />
@@ -33,8 +31,6 @@
     <EmbeddedResource Remove="day17\**" />
     <EmbeddedResource Remove="day18\**" />
     <EmbeddedResource Remove="day19\**" />
-    <EmbeddedResource Remove="day6\**" />
-    <EmbeddedResource Remove="day7\**" />
     <EmbeddedResource Remove="day8\**" />
     <EmbeddedResource Remove="day9\**" />
     <None Remove="day10\**" />
@@ -47,8 +43,6 @@
     <None Remove="day17\**" />
     <None Remove="day18\**" />
     <None Remove="day19\**" />
-    <None Remove="day6\**" />
-    <None Remove="day7\**" />
     <None Remove="day8\**" />
     <None Remove="day9\**" />
   </ItemGroup>
