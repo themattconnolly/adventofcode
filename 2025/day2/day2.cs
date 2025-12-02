@@ -61,7 +61,46 @@ public class Day2
     public static void RunPart2()
     {
         ParseFile();
-        // TODO: implement Part 2 logic
-        Console.WriteLine("Day 2 - Part 2: not implemented");
+        
+        long sum = 0;
+        foreach (var range in ranges)
+        {
+            long start = range.Item1;
+            long end = range.Item2;
+
+            for (long i = start; i <= end; i++)
+            {
+                string number = i.ToString();
+                for(int j = 0; j < number.Length / 2; j++)
+                {
+                    string pattern = number.Substring(0, j + 1);
+                    // if entire number is made of this pattern repeated
+                    if(number.Length % pattern.Length == 0)
+                    {
+                        int repeats = number.Length / pattern.Length;
+
+                        bool match = true;
+                        for(int k = 0; k < repeats; k++)
+                        {
+                            if(number.Substring(k * pattern.Length, pattern.Length) != pattern)
+                            {
+                                match = false;
+                                break;
+                            }
+                        }
+                        
+                        if(match)
+                        {
+                            // found a match
+                            Console.WriteLine("Found matching number: " + number);
+                            sum += i;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        Console.WriteLine("Day 2 - Part 2: " + sum);
     }
 }
