@@ -52,10 +52,70 @@ public class Day1
         Console.WriteLine("Part 1 : " + numberOfZeros);
     }
 
+    private static int TurnDial2(string instruction)
+    {
+        int zerosHit = 0;
+        // instruction looks like this: "L13" or "R7"
+        char direction = instruction[0];
+        int amount = int.Parse(instruction.Substring(1));
+        int previousDial = dial;
+        if (direction == 'L')
+        {
+            dial -= amount;
+        }
+        else if (direction == 'R')
+        {
+            dial += amount;
+        }
+
+        if(dial < 0 && previousDial > 0)
+        {
+            zerosHit = 1; // crossed zero
+        }
+        else if(dial == 0)
+        {
+            zerosHit = 1; // landed on zero exactly
+        }
+
+        int tempDial = dial;
+        if(dial < 0)
+        {
+            tempDial = -1 * dial;
+        }
+        
+        
+        while(tempDial >= 100)
+        {
+            zerosHit++;
+            tempDial -= 100;
+        }
+        
+        if(dial < 0 && tempDial > 0)
+        {
+            dial = 100 - tempDial;
+        }
+        else
+        {
+            dial = tempDial;
+        }
+
+        return zerosHit;
+    }
+
     public static void RunPart2()
     {
         ParseFile();
-        Console.WriteLine("Part 2 : Not implemented yet");
+
+        int numberOfZeros = 0;
+        foreach (string instruction in instructions)
+        {
+            int zeros = TurnDial2(instruction);
+            numberOfZeros += zeros;
+            Console.WriteLine("Dial is rotated by " + instruction + " and now at: " + dial + " Zeros hit: " + zeros);
+        }
+
+
+        Console.WriteLine("Part 2 : " + numberOfZeros); //6888 is too high, 6434 is too low
     }
 }
 
