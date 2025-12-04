@@ -11,7 +11,7 @@ public class Day2
 
     private static void ParseFile()
     {
-        string filename = "day2/input.txt";
+        string filename = System.IO.Path.Combine(AppContext.BaseDirectory, "day2/input.txt");
         using (var file = new System.IO.StreamReader(filename))
         {
             string? line = file.ReadLine();

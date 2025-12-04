@@ -6,7 +6,7 @@ public class Day1
     private static List<string> instructions = new List<string>();
     private static void ParseFile()
     {
-        string filename = "day1/input.txt";
+        string filename = System.IO.Path.Combine(AppContext.BaseDirectory, "day1/input.txt");
         string line;
         System.IO.StreamReader file = new System.IO.StreamReader(filename);
         while((line = file.ReadLine()) != null)

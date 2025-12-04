@@ -2,8 +2,9 @@
   "profiles": {
     "2025": {
       "commandName": "Project",
-      "commandLineArgs": "day1 part2"
+      "commandLineArgs": "day4 part1"
     }
   }
 }
+
 
