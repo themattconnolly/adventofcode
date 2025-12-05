@@ -15,6 +15,10 @@ public class Day2
         using (var file = new System.IO.StreamReader(filename))
         {
             string? line = file.ReadLine();
+            if(line == null)
+            {
+                return;
+            }
             // split on commas
             foreach(string range in line.Split(',').ToList())
             {
