@@ -9,7 +9,7 @@
             "type": "coreclr",
             "request": "launch",
             "program": "${workspaceFolder}/2025/bin/Debug/net8.0/2025.dll",
-            "args": ["day6", "part2"],
+            "args": ["day8", "part2"],
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
             "console": "internalConsole"
